@@ -1,0 +1,5 @@
+{
+  "name": "FaceSense AI",
+  "description": "Advanced facial analysis dashboard using AI to detect emotions (Ekman 6) and age demographics from images and video frames.",
+  "requestFramePermissions": []
+}
