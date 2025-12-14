@@ -67,7 +67,7 @@ def analyze_media():
              return jsonify({'error': '無效的影像資料'}), 400
 
         # 2. 使用 DeepFace 進行分析
-        # enforce_detection=False: 即使沒偵測到臉也不要報錯 (會回傳空結果或全圖分析)
+        # enforce_detection=False: 即使沒偵測到臉也不報錯 (會回傳空結果或全圖分析)
         objs = DeepFace.analyze(img, 
                               actions=['emotion', 'age', 'gender', 'race'],
                               enforce_detection=False)
@@ -81,7 +81,7 @@ def analyze_media():
 
         for res in objs:
             # 過濾掉信心度太低的誤判 (DeepFace 偶爾會把背景看成臉)
-            if res.get('face_confidence', 1.0) < 0.4:
+            if res.get('face_confidence', 1.0) < 0.6:
                 continue
 
             results.append({
