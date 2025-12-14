@@ -68,23 +68,25 @@ export const analyzeImage = async (
 // 資料轉換層 (Backend JSON -> Frontend Types)
 // ============================================================================
 
+// 在 services/geminiService.ts 底部找到這個函式
+
 const mapBackendResponseToFrontend = (backendData: any, fileId: string): FaceData[] => {
   if (!backendData || !Array.isArray(backendData.results)) {
     return [];
   }
 
   return backendData.results.map((item: any, index: number) => {
-    // 1. 處理情緒字串轉換 (DeepFace 的輸出轉為 EmotionType Enum)
+    // ... (保留原本的情緒與年齡邏輯) ...
+
+    // 1. 處理情緒 (這部分保持原本的程式碼)
     const rawEmotion = item.emotion || 'neutral';
-    // DeepFace 輸出可能是小寫，首字大寫化以符合 Enum
     const emotionStr = rawEmotion.charAt(0).toUpperCase() + rawEmotion.slice(1);
-    
     let dominantEmotion = EmotionType.Neutral;
     if (Object.values(EmotionType).includes(emotionStr as EmotionType)) {
       dominantEmotion = emotionStr as EmotionType;
     }
 
-    // 2. 處理年齡區間 (DeepFace 直接給數字)
+    // 2. 處理年齡 (這部分保持原本的程式碼)
     const age = item.age || 25;
     let ageRange = AgeRange.Adult;
     if (age <= 12) ageRange = AgeRange.Child;
@@ -94,21 +96,20 @@ const mapBackendResponseToFrontend = (backendData: any, fileId: string): FaceDat
     else if (age <= 60) ageRange = AgeRange.MiddleAge;
     else ageRange = AgeRange.Senior;
 
-    // 3. 處理性別或種族 (如果你需要在前端顯示這些，可以在 types.ts FaceData 擴充欄位)
-    // 目前你的 FaceData 只有情緒和年齡，所以我們只取這兩個。
-    // 如果你想顯示種族，建議修改 types.ts 加入 race 欄位。
-
     return {
       id: `${fileId}-face-${index}`,
-      box_2d: item.bbox || [0, 0, 0, 0], 
+      box_2d: item.bbox || [0, 0, 0, 0],
       dominantEmotion: dominantEmotion,
-      // 建構模擬的分數分佈 (DeepFace 如果沒回傳詳細機率，就給 dominant 100%)
       emotions: [
         { emotion: dominantEmotion, score: 0.95 },
         { emotion: EmotionType.Neutral, score: 0.05 }
       ],
       ageRange: ageRange,
-      ageConfidence: item.confidence || 0.8
+      ageConfidence: item.confidence || 0.8,
+      
+      // --- 新增這裡：填入後端回傳的資料 ---
+      gender: item.gender || "Unknown",
+      race: item.race || "Unknown"
     };
   });
 };

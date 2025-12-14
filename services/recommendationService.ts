@@ -1,66 +1,114 @@
+import { 
+  GoogleGenerativeAI, 
+  HarmCategory, 
+  HarmBlockThreshold 
+} from "@google/generative-ai";
 import { AgeRange, EmotionType, Product } from "../types";
 
-// 模擬雜貨店商品資料庫
-const MOCK_INVENTORY = [
-  // 零食類
-  { id: 's1', name: 'Dark Chocolate 85%', category: 'Snacks', price: 120, tags: [EmotionType.Sad, EmotionType.Fear, AgeRange.Adult, AgeRange.MiddleAge, AgeRange.Senior] },
-  { id: 's2', name: 'Rainbow Gummy Bears', category: 'Candy', price: 45, tags: [AgeRange.Child, AgeRange.Teen, EmotionType.Happy] },
-  { id: 's3', name: 'Spicy Potato Chips', category: 'Snacks', price: 35, tags: [EmotionType.Anger, EmotionType.Surprise, AgeRange.Teen, AgeRange.YoungAdult] },
-  { id: 's4', name: 'Party Mix Bucket', category: 'Snacks', price: 250, tags: [EmotionType.Happy, AgeRange.YoungAdult, AgeRange.Adult] },
-  { id: 's5', name: 'Organic Rice Crackers', category: 'Snacks', price: 80, tags: [AgeRange.Senior, AgeRange.Child, EmotionType.Neutral] },
-  
-  // 飲料類
-  { id: 'd1', name: 'Energy Drink XL', category: 'Drinks', price: 60, tags: [EmotionType.Disgust, AgeRange.YoungAdult, AgeRange.Adult] }, // Need energy to deal with it
-  { id: 'd2', name: 'Chamomile Tea', category: 'Tea', price: 150, tags: [EmotionType.Fear, EmotionType.Sad, AgeRange.MiddleAge, AgeRange.Senior] },
-  { id: 'd3', name: 'Ice Cold Cola', category: 'Drinks', price: 25, tags: [EmotionType.Happy, EmotionType.Anger, AgeRange.Teen] },
-  { id: 'd4', name: 'Premium Craft Beer', category: 'Alcohol', price: 180, tags: [EmotionType.Sad, EmotionType.Happy, AgeRange.Adult, AgeRange.MiddleAge] },
-  { id: 'd5', name: 'Calcium Milk', category: 'Dairy', price: 90, tags: [AgeRange.Child, AgeRange.Senior] },
-  
-  // 生活用品/其他
-  { id: 'o1', name: 'Lavender Eye Mask', category: 'Wellness', price: 300, tags: [EmotionType.Fear, EmotionType.Sad, AgeRange.Adult] },
-  { id: 'o2', name: 'Surprise Toy Box', category: 'Toys', price: 199, tags: [EmotionType.Surprise, AgeRange.Child] },
-  { id: 'o3', name: 'Vitamin C 1000mg', category: 'Health', price: 450, tags: [EmotionType.Disgust, AgeRange.MiddleAge, AgeRange.Senior] }, // Sick?
-  { id: 'o4', name: 'Chewing Gum (Mint)', category: 'Candy', price: 30, tags: [EmotionType.Anger, EmotionType.Neutral] },
-];
+// @ts-ignore
+const API_KEY = process.env.GEMINI_API_KEY;
 
-/**
- * 根據情緒和年齡推薦商品
- */
-export const getRecommendations = (emotion: EmotionType, age: AgeRange): Product[] => {
-  // 1. 找出符合情緒 或 符合年齡 的商品
-  const relevantProducts = MOCK_INVENTORY.filter(item => {
-    return item.tags.includes(emotion) || item.tags.includes(age);
-  });
+// 如果沒有 Key，在 Console 警告
+if (!API_KEY) {
+  console.error("錯誤：找不到 GEMINI_API_KEY，請檢查 .env 檔案");
+}
 
-  // 2. 評分排序 (同時符合 情緒+年齡 的優先)
-  const scoredProducts = relevantProducts.map(item => {
-    let score = 0;
-    if (item.tags.includes(emotion)) score += 2;
-    if (item.tags.includes(age)) score += 1;
+const genAI = new GoogleGenerativeAI(API_KEY);
+
+export const getRecommendations = async (
+  emotion: EmotionType, 
+  age: AgeRange,
+  gender: string,
+  race: string
+): Promise<Product[]> => {
+  try {
+    // 設定模型參數
+    const model = genAI.getGenerativeModel({ 
+      
+      model: "gemini-2.5-flash", 
+      
+      // 強制使用 JSON 模式 (減少格式錯誤)
+      generationConfig: {
+        responseMimeType: "application/json"
+      },
+
+      // 降低安全過濾門檻
+      // 依據「人種/性別」推薦，容易觸發敏感詞過濾，所以設為 BLOCK_ONLY_HIGH
+      safetySettings: [
+        {
+          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+      ],
+    });
+
+    const prompt = `
+      You are a smart retail recommendation assistant.
+      Recommend exactly 3 creative products for this customer profile:
+      - Emotion: ${emotion}
+      - Age Group: ${age}
+      - Gender: ${gender}
+      - Race/Ethnicity: ${race}
+
+      Strict Constraints:
+      1. Output MUST be a JSON list of 3 objects.
+      2. "name": Max 5 words.
+      3. "reason": EXTREMELY SHORT. Max 10-15 words. One sentence only.
+      4. "price": Realistic integer USD.
+
+      JSON Schema:
+      [{"id": "string", "name": "string", "category": "string", "price": number, "reason": "string"}]
+    `;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
     
-    // 隨機擾動，讓推薦不會每次都一模一樣
-    score += Math.random() * 0.5;
-
-    // 產生推薦理由
-    let reason = "";
-    if (item.tags.includes(emotion)) {
-        if (emotion === EmotionType.Sad) reason = "Comfort food for you";
-        else if (emotion === EmotionType.Happy) reason = "Keep the vibe going!";
-        else if (emotion === EmotionType.Anger) reason = "Cool down a bit";
-        else if (emotion === EmotionType.Fear) reason = "Something to relax";
-        else reason = "Matches your mood";
-    } else {
-        reason = "Popular for your age";
+    // 檢查是否有回傳文字
+    const text = response.text();
+    if (!text) {
+      console.warn("Gemini 回傳空內容，可能是被安全過濾擋住了。");
+      throw new Error("Empty response");
     }
 
-    return { ...item, score, reason };
-  });
+    // 因為用了 responseMimeType: "application/json"，通常不需要再 replace markdown
+    // makesure
+    const cleanText = text.replace(/```json|```/g, "").trim();
+    
+    const products: Product[] = JSON.parse(cleanText);
+    return products;
 
-  // 3. 排序並取前 3 名
-  return scoredProducts
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 3)
-    .map(({ id, name, category, price, reason }) => ({
-      id, name, category, price, reason
-    }));
+  } catch (error) {
+    console.error("Gemini 推薦發生錯誤:", error);
+    
+    // 如果AI 講了一些廢話而不是 JSON
+    // 回傳預設值讓 UI 不會壞掉
+    return [
+      {
+        id: "err-1",
+        name: "Classic Coffee",
+        category: "Drinks",
+        price: 50,
+        reason: "Relax while we fix our AI connection."
+      },
+      {
+        id: "err-2",
+        name: "Chocolate Bar",
+        category: "Snacks",
+        price: 30,
+        reason: "Sweet treat works for everyone."
+      }
+    ];
+  }
 };
