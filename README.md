@@ -2,8 +2,7 @@
 
 **FaceSense AI** 是一個結合 **電腦視覺 (Computer Vision)** 與 **生成式 AI (Generative AI)** 的智慧分析平台。透過上傳圖片或影片，系統能即時偵測使用者的情緒、年齡、性別與人種，並利用大型語言模型 (LLM) 提供具備情境感知的個人化商品推薦。
 
-![Project Banner]([螢幕擷取畫面 2025-12-14 174522.png](https://github.com/jj2266h/muti-media-emotion_detection/blob/main/%E8%9E%A2%E5%B9%95%E6%93%B7%E5%8F%96%E7%95%AB%E9%9D%A2%202025-12-14%20174522.png))
-*(建議將你的截圖放在專案根目錄或 assets 資料夾中，並更新此路徑)*
+![螢幕擷取畫面 2025-12-14 174522.png](https://github.com/jj2266h/muti-media-emotion_detection/blob/main/%E8%9E%A2%E5%B9%95%E6%93%B7%E5%8F%96%E7%95%AB%E9%9D%A2%202025-12-14%20174522.png)
 
 ## 🌟 核心功能 (Features)
 
@@ -36,7 +35,7 @@
 * **OpenCV**: 影像與影片處理。
 
 ### AI Services (AI 服務)
-* **Google Gemini API**: 生成式推薦引擎 (Model: `gemini-2.0-flash-lite-001`)。
+* **Google Gemini API**: 生成式推薦引擎 (Model: `gemini-2.5-flash`)。
 
 ---
 
@@ -70,7 +69,9 @@ python app.py
 
 *成功啟動後，你應該會看到： `Running on http://127.0.0.1:5000*`
 
-###3. 啟動前端 (Frontend Setup)```bash
+### 3. 啟動前端 (Frontend Setup)
+
+```bash
 # 1. 安裝 npm 套件
 npm install
 
@@ -87,7 +88,9 @@ npm run dev
 
 ---
 
-##📂 專案結構 (Project Structure)```text
+##📂 專案結構 (Project Structure)
+
+```text
 facesense-ai/
 ├── app.py                  # Python Flask 後端核心
 ├── src/
@@ -103,8 +106,4 @@ facesense-ai/
 │   └── App.tsx             # 主程式入口
 ├── public/                 # 靜態檔案
 └── package.json            # 前端依賴設定
-
-```
-```
-
 ```
