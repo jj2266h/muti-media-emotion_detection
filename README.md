@@ -88,7 +88,7 @@ npm run dev
 
 ---
 
-##📂 專案結構 (Project Structure)
+## 📂 專案結構 (Project Structure)
 
 ```text
 facesense-ai/
