@@ -2,7 +2,7 @@
 
 **FaceSense AI** 是一個結合 **電腦視覺 (Computer Vision)** 與 **生成式 AI (Generative AI)** 的智慧分析平台。透過上傳圖片或影片，系統能即時偵測使用者的情緒、年齡、性別與人種，並利用大型語言模型 (LLM) 提供具備情境感知的個人化商品推薦。
 
-![Project Banner](image_9f1938.png)
+![Project Banner](螢幕擷取畫面 2025-12-14 174522.png)
 *(建議將你的截圖放在專案根目錄或 assets 資料夾中，並更新此路徑)*
 
 ## 🌟 核心功能 (Features)
