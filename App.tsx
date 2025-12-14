@@ -104,7 +104,7 @@ const App: React.FC = () => {
           </div>
           <div className="flex items-center space-x-6 text-sm text-slate-400">
              <a href="#" className="hover:text-blue-400 transition-colors">Documentation</a>
-             <a href="#" className="hover:text-blue-400 transition-colors flex items-center gap-2">
+             <a href="https://github.com/jj2266h/muti-media-emotion_detection.git" className="hover:text-blue-400 transition-colors flex items-center gap-2">
                <Github size={16}/> Source
              </a>
           </div>
