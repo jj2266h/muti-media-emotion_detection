@@ -29,6 +29,10 @@ export interface FaceData {
   dominantEmotion: EmotionType;
   ageRange: AgeRange;
   ageConfidence: number;
+  
+  // --- 新增這兩個欄位 ---
+  gender: string;
+  race: string;
 }
 
 export interface AnalysisResult {
