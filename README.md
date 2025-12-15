@@ -31,7 +31,7 @@
 
 ### Backend (後端)
 * **Python Flask**: 輕量級 RESTful API 伺服器。
-* **DeepFace**: 強大的臉部屬性分析函式庫 (基於 TensorFlow/Keras)。
+* **DeepFace**: 臉部屬性分析函式庫。
 * **OpenCV**: 影像與影片處理。
 
 ### AI Services (AI 服務)
