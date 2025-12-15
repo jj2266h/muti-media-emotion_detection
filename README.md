@@ -108,6 +108,4 @@ facesense-ai/
 └── package.json            # 前端依賴設定
 ```
 ## ✨ Acknowledgements
-Code assistance and documentation provided by Google Gemini.
-
-Powered by the open-source DeepFace library.
+Code documentation provided by Google Gemini.
